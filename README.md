@@ -1,5 +1,8 @@
 # Test to create a sample of memory game with pixijs.
 
+Demo  
+[https://evofan.github.io/pixijs_test_memory_game/dist/](https://evofan.github.io/pixijs_test_memory_game/dist/)  
+
 reference
 
 **楽しく学べるJavaゲーム・アプレット 第3版**  
