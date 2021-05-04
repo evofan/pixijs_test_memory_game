@@ -76,7 +76,7 @@ let loader: PIXI.Loader = new PIXI.Loader();
 
 // asset
 const ASSET_BG: string = ASSETS.ASSET_BG;
-// const ASSET_OBJ1: string = ASSETS.ASSET_OBJ1;
+const ASSET_OBJ1: string = ASSETS.ASSET_OBJ1;
 
 // container
 let container: PIXI.Container = new PIXI.Container();
@@ -94,14 +94,16 @@ stage.addChild(container);
 // init
 let bg: PIXI.Sprite;
 
-let gameState: string = "init";
 let gameLoopFlag: boolean = false;
 
-let gameScene: PIXI.Container = new PIXI.Container();
-let gameOverScene: PIXI.Container = new PIXI.Container();
-let gameClearScene: PIXI.Container = new PIXI.Container();
-let message_gameover: PIXI.Text;
-let message_gameclear: PIXI.Text;
+let card_back: PIXI.Sprite;
+let card_0: PIXI.Sprite;
+let card_1: PIXI.Sprite;
+let card_2: PIXI.Sprite;
+let card_3: PIXI.Sprite;
+let card_4: PIXI.Sprite;
+let card_5: PIXI.Sprite;
+let card_6: PIXI.Sprite;
 
 // text
 let text_pixiVersion: PIXI.Text;
@@ -111,7 +113,7 @@ if (ASSET_BG === "") {
 } else {
   loader.add("bg_data", ASSET_BG);
 }
-// loader.add("obj_1_data", ASSET_OBJ1);
+loader.add("obj_1_data", ASSET_OBJ1);
 
 loader.load((loader: PIXI.Loader, resources: any) => {
   console.log(loader);
@@ -131,10 +133,9 @@ loader.onError.add(() => {
   throw Error("load error ...");
 });
 
-// function
 
 /**
- * Runs the current game state in a loop and renders the sprite.
+ *
  * @param delta
  */
 const gameLoop = (delta: number): void => {
@@ -142,15 +143,72 @@ const gameLoop = (delta: number): void => {
 };
 
 /**
- * The setup() function is executed as soon as the texture atlas image is loaded.
- * It runs only once and allows you to run the setup task only once for your game.
- * Great place to create and initialize objects, sprites, game scenes, generate data arrays, and analyze loaded JSON game data.
+ *
  * @param resources
  */
 const gameSetup = (resources: any): void => {
   console.log("gameSetup()");
 
-  gameState = "play";
+  // set sprite sheet(texture atras frame)
+  let id: any = resources.obj_1_data.textures;
+
+  // Create card sprite
+
+  // back
+  card_back = new PIXI.Sprite(id["pic_back.png"]);
+  card_back.scale.x = card_back.scale.y = 0.5;
+  card_back.x = 10;
+  card_back.y = 10;
+  container.addChild(card_back);
+
+  // 0
+  card_0 = new PIXI.Sprite(id["pic_0.png"]);
+  card_0.scale.x = card_0.scale.y = 0.5;
+  card_0.x = 120;
+  card_0.y = 10;
+  container.addChild(card_0);
+
+  // 1
+  card_1 = new PIXI.Sprite(id["pic_1.png"]);
+  card_1.scale.x = card_1.scale.y = 0.5;
+  card_1.x = 230;
+  card_1.y = 10;
+  container.addChild(card_1);
+
+  // 2
+  card_2 = new PIXI.Sprite(id["pic_2.png"]);
+  card_2.scale.x = card_2.scale.y = 0.5;
+  card_2.x = 340;
+  card_2.y = 10;
+  container.addChild(card_2);
+
+  // 3
+  card_3 = new PIXI.Sprite(id["pic_3.png"]);
+  card_3.scale.x = card_3.scale.y = 0.5;
+  card_3.x = 10;
+  card_3.y = 120;
+  container.addChild(card_3);
+
+  // 4
+  card_4 = new PIXI.Sprite(id["pic_4.png"]);
+  card_4.scale.x = card_4.scale.y = 0.5;
+  card_4.x = 120;
+  card_4.y = 120;
+  container.addChild(card_4);
+
+  // 5
+  card_5 = new PIXI.Sprite(id["pic_5.png"]);
+  card_5.scale.x = card_5.scale.y = 0.5;
+  card_5.x = 230;
+  card_5.y = 120;
+  container.addChild(card_5);
+
+  // 6
+  card_6 = new PIXI.Sprite(id["pic_6.png"]);
+  card_6.scale.x = card_6.scale.y = 0.5;
+  card_6.x = 340;
+  card_6.y = 120;
+  container.addChild(card_6);
 
   // app start
   gameLoopFlag = true;
