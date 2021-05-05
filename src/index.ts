@@ -11,6 +11,7 @@ import { gsap } from "gsap"; // npm install -D @types/gsap
 
 import { PixiPlugin } from "gsap/PixiPlugin";
 import { AnimatedSprite, DisplayObject, Sprite } from "pixi.js";
+import { shuffle } from "gsap/all";
 
 // register the plugin
 gsap.registerPlugin(PixiPlugin);
@@ -133,7 +134,6 @@ loader.onError.add(() => {
   throw Error("load error ...");
 });
 
-
 /**
  *
  * @param delta
@@ -213,4 +213,180 @@ const gameSetup = (resources: any): void => {
   // app start
   gameLoopFlag = true;
   requestAnimationFrame(animate); // -> gameLoop start
+
+  const cardgame: CardGame = new CardGame();
+  cardgame.testA(); // testA()
+  // cardgame.testB(); // err, private
+  console.log(cardgame.a); // 1
+  // console.log(cardgame.b); // err
 };
+
+class CardGame {
+  public a: number = 1;
+  private b: number = 2;
+
+  public pict: number[] = []; // カードの絵を入れる配列
+  public back: number = 0; // カードの裏の絵を入れる変数
+
+  public cardMaxNum: number = 12; // カードの最大枚数
+
+  public count: number = 0; // ひっくり返されたカードの枚数
+  public openCard: [number, number] = [100, 100]; // ひっくり返された2枚のカード番号
+  public stat: number[] = []; // カードの状態（0:裏、1:今回ひっくり返された、2:表のまま）
+
+  public card: number[] = []; // カードの配列、セットされた絵の番号が入る
+  public x: number[] = []; // カードのx座標
+  public y: number[] = []; // カードのy座標
+  public cardWidth: number = 200; // カードの横幅
+  public cardHeight: number = 200; // カードの縦幅
+  public cardMargin: number = 10; // 並べる時の余白
+
+  /**
+   * 初期化する
+   */
+  public init(): void {
+    // カードを並べる（カードのx,y座標を設定）
+    // カードをセットする
+    // shuffle();
+    // マウスリスナーとして自分を登録
+  }
+
+  public paint(): void {
+    // update(g)
+  }
+
+  public update(g: PIXI.Graphics): void {
+    // バックをオレンジで塗る
+
+    // タイトルの描画
+
+    // カードの描画
+    for (let i: number = 0; i < this.cardMaxNum; i++) {
+      if (this.stat[i] === 0) {
+        // 裏側の絵を描く
+      } else {
+        // 表側の絵を描く
+      }
+    }
+
+    // シャッフルボタンの描画
+  }
+
+  public mousePressed(e: MouseEvent): void {
+    // マウスが押された座標を得る →★直に押したスプライトで取得？
+    let ix: number = e.movementX;
+    let iy: number = e.movementY;
+
+    // 押した座標がシャッフルボタンの場合、カードをセットし直す →★直に押したボタンから飛ぶ？
+    // if(){
+    //   shuffle();
+    //   repaint();
+    // }
+
+    // 1枚目のカードをひっくり返す前の処理＝前回のカードを裏返しにする
+    for (let i: number = 0; i < this.cardMaxNum; i++) {
+      if (this.stat[i] === 1) {
+        // 前回ひっくり返されたカードを元に戻す（前回一致:2のｊカードはそのまま）
+        this.stat[i] = 0; // 裏に
+        // repaint（再描画で裏の絵に）
+      }
+    }
+
+    // 今回ひっくり返すカードの処理
+    // 元のコードではマウスの押された座標から、行と列を割り出し、その値を使用して指定のカードを決定
+    let col: number = 0,
+      row: number = 0;
+
+    if (col >= 0 && row >= 0) {
+      // ひっくり返すカードの番号
+      let nn: number = col * 4 + row; // 考え方
+
+      if (this.stat[nn] === 0) {
+        // カードが裏だったら、カードをひっくり返す
+        this.openCard[this.count] = nn;
+
+        // カードの状態を「今ひっくり返した」にする
+        this.stat[nn] = 1;
+
+        // repaint() 当該カードの表示を表にする
+
+        // 2枚目のカードをひっくり返す処理
+        if (this.count === 1) {
+          if (this.card[this.openCard[0]] === this.card[this.openCard[1]]) {
+            // 絵が一致したらカードの状態を表に固定する
+            this.stat[this.openCard[0]] = 2;
+            this.stat[this.openCard[1]] = 2;
+          }
+        }
+      }
+
+      // 現在何枚のカードがひっくり返されたか
+      this.count = this.count + 1;
+      if (this.count === 2) {
+        this.count = 0;
+      }
+    }
+  }
+
+  public mouseReleased(e: MouseEvent): void {
+    // マウスボタンが離された
+  }
+
+  public mouseClicked(e: MouseEvent): void {
+    // マウスボタンがクリックされた
+  }
+
+  public mouseEntered(e: MouseEvent): void {
+    // マウスボがボタン領域に入ってきた（over）
+  }
+
+  public mouseExited(e: MouseEvent): void {
+    // マウスボがボタン領域に入ってきた（overout）
+  }
+
+  public Shuffle(): void {
+    // 変数の初期化
+    this.count = 0; // ひっくり返されたカード枚数は0枚
+    this.stat.map((idx) => {
+      // カードを全て裏の状態に戻す
+      this.stat[idx] = 0;
+    });
+
+    // 使わない絵を乱数で決める
+    let notUseCard = randomInt(0, 6);
+    console.log(`notUseCard: ${notUseCard}`);
+
+    // カードに絵の番号をセットする
+    let k: number = 0;
+    for (let i: number = 0; i < 7; i++) {
+      if (i !== notUseCard) {
+        // notUseCard以外の絵の番号をセット
+        this.card[k] = i;
+        this.card[k + 1] + i;
+        k = k + 2;
+      }
+    }
+
+    // カードの順番を入れ替える
+    // カードの枚数だけループ
+    for (let i: number = 0; i < this.cardMaxNum; i++) {
+      // 乱数で入れ替えるカードを決める
+      let cardNo = randomInt(0, this.cardMaxNum);
+      console.log(cardNo);
+
+      // カードの入れ替え
+      let work: number = this.card[k];
+      this.card[k] = this.card[cardNo];
+      cardNo = work;
+    }
+  }
+
+  public testA() {
+    console.log("testA()");
+    // this.testB(); // ok
+  }
+
+  private testB() {
+    console.log("testB()");
+  }
+}
