@@ -10,7 +10,12 @@ import { Howl, Howler } from "howler"; // npm install --save @types/howler
 import { gsap } from "gsap"; // npm install -D @types/gsap
 
 import { PixiPlugin } from "gsap/PixiPlugin";
-import { AnimatedSprite, DisplayObject, Sprite } from "pixi.js";
+import {
+  AnimatedSprite,
+  DisplayObject,
+  InteractionEvent,
+  Sprite,
+} from "pixi.js";
 import { shuffle } from "gsap/all";
 
 // register the plugin
@@ -209,6 +214,29 @@ const gameSetup = (resources: any): void => {
   card_6.x = 340;
   card_6.y = 120;
   container.addChild(card_6);
+  // temp
+  card_6.interactive = true;
+  card_6.buttonMode = true;
+  card_6.interactiveChildren = true;
+  card_6.name = "card_6"; // name: "card_6"
+
+  card_6.on("tap", (e: InteractionEvent) => {
+    //console.log("card_6 tap!", e, "\n2:", e.target, "\n3:", e.currentTarget,"\n4:", e.target['name']);
+    console.log("card_6 tap!", e.target.name);
+  });
+  card_6.on("click", (e: MouseEvent) => {
+    console.log("card_6 click!", e);
+  });
+  /*
+  InteractionEvent {stopped: false, stopsPropagatingAt: null, stopPropagationHint: false, target: Sprite, currentTarget: Sprite, …}
+  currentTarget: null
+  data: InteractionData {pressure: 0, rotationAngle: false, twist: 0, tangentialPressure: 0, global: Point, …}
+  stopPropagationHint: false
+  stopped: false
+  stopsPropagatingAt: null
+  target: null
+  type: "tap"
+  */
 
   // app start
   gameLoopFlag = true;
@@ -219,6 +247,9 @@ const gameSetup = (resources: any): void => {
   // cardgame.testB(); // err, private
   console.log(cardgame.a); // 1
   // console.log(cardgame.b); // err
+
+  // 最初に使うカードの絵を選び、並び順をシャッフルする
+  cardgame.shuffle();
 };
 
 class CardGame {
@@ -228,18 +259,18 @@ class CardGame {
   public pict: number[] = []; // カードの絵を入れる配列
   public back: number = 0; // カードの裏の絵を入れる変数
 
-  public cardMaxNum: number = 12; // カードの最大枚数
+  public cardMaxNum: number = 12; // カードの最大枚数, 1-12
 
-  public count: number = 0; // ひっくり返されたカードの枚数
+  public count: number = 0; // ひっくり返されたカードの枚数、最大2枚、2枚ひっくり返したら元に戻す
   public openCard: [number, number] = [100, 100]; // ひっくり返された2枚のカード番号
-  public stat: number[] = []; // カードの状態（0:裏、1:今回ひっくり返された、2:表のまま）
+  public stat: number[] = []; // 全部の（枚数の）カードの状態（0:裏、1:今回ひっくり返された、2:表のまま）
 
   public card: number[] = []; // カードの配列、セットされた絵の番号が入る
   public x: number[] = []; // カードのx座標
   public y: number[] = []; // カードのy座標
-  public cardWidth: number = 200; // カードの横幅
-  public cardHeight: number = 200; // カードの縦幅
-  public cardMargin: number = 10; // 並べる時の余白
+  public cardWidth: number = 200; // カード画像の横幅
+  public cardHeight: number = 200; // カード画像の縦幅
+  public cardMargin: number = 10; // カード画像を並べる時の余白
 
   /**
    * 初期化する
@@ -344,41 +375,46 @@ class CardGame {
     // マウスボがボタン領域に入ってきた（overout）
   }
 
-  public Shuffle(): void {
+  /**
+   * カードをシャッフルする
+   */
+  public shuffle(): void {
     // 変数の初期化
-    this.count = 0; // ひっくり返されたカード枚数は0枚
+    this.count = 0; // ひっくり返されたカード枚数を0枚にリセット
     this.stat.map((idx) => {
       // カードを全て裏の状態に戻す
       this.stat[idx] = 0;
     });
 
-    // 使わない絵を乱数で決める
-    let notUseCard = randomInt(0, 6);
+    // 使わない絵を1組を乱数で決める
+    let notUseCard = randomInt(0, 6); // 0-6の7枚
     console.log(`notUseCard: ${notUseCard}`);
 
     // カードに絵の番号をセットする
     let k: number = 0;
     for (let i: number = 0; i < 7; i++) {
       if (i !== notUseCard) {
-        // notUseCard以外の絵の番号をセット
+        // notUseCard以外の絵の番号をセット、2枚組でセットされる
         this.card[k] = i;
-        this.card[k + 1] + i;
+        this.card[k + 1] = i;
         k = k + 2;
       }
     }
+    console.log(`this.card（1組の絵を削除後）: ${this.card}`); // ex. this.card: 0,0,1,1,2,2,3,3,5,5,6,6
 
     // カードの順番を入れ替える
     // カードの枚数だけループ
-    for (let i: number = 0; i < this.cardMaxNum; i++) {
+    for (let j: number = 0; j < this.cardMaxNum; j++) {
       // 乱数で入れ替えるカードを決める
-      let cardNo = randomInt(0, this.cardMaxNum);
-      console.log(cardNo);
+      let rndNum: number = randomInt(0, this.cardMaxNum - 1); // バブルソート等、他のソード方法でもいいかも
+      console.log(rndNum);
 
       // カードの入れ替え
-      let work: number = this.card[k];
-      this.card[k] = this.card[cardNo];
-      cardNo = work;
+      let tempNum: number = this.card[j];
+      this.card[j] = this.card[rndNum];
+      this.card[rndNum] = tempNum;
     }
+    console.log(`this.card（並べ替え後）: ${this.card}`); // ex. this.card（並べ替え後）: 5,3,6,1,0,4,5,1,3,6,4,0
   }
 
   public testA() {
