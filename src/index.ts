@@ -224,8 +224,8 @@ const gameSetup = (resources: any): void => {
     //console.log("card_6 tap!", e, "\n2:", e.target, "\n3:", e.currentTarget,"\n4:", e.target['name']);
     console.log("card_6 tap!", e.target.name);
   });
-  card_6.on("click", (e: MouseEvent) => {
-    console.log("card_6 click!", e);
+  card_6.on("click", (e: InteractionEvent) => {
+    console.log("card_6 click!", e.target.name);
   });
   /*
   InteractionEvent {stopped: false, stopsPropagatingAt: null, stopPropagationHint: false, target: Sprite, currentTarget: Sprite, …}
@@ -238,6 +238,45 @@ const gameSetup = (resources: any): void => {
   type: "tap"
   */
 
+  // test rect
+  // 25.長方形
+  // すべての形状は、最初にPixiのGraphicsクラス（PIXI.Graphics）の新しいインスタンスを作成することによって作られます。
+  let rectangle: PIXI.Graphics = new PIXI.Graphics();
+
+  // 図形に輪郭を付ける場合は、lineStyleメソッドを使用します。四角形の幅4ピクセルの赤い輪郭をアルファ値1で指定する方法は次のとおりです。
+  rectangle.lineStyle(4, 0xff3300, 1); // width, color, alpha
+
+  // 長方形を描画するには、drawRect()メソッドを使用します。その4つの引数は、x、y、width、およびheightです。
+  // rectangle.drawRect(x, y, width, height);
+
+  // 終了したらendFill()を使用します。
+
+  // Canvas Drawing APIとまったく同じです。
+  // これが、四角形を描画し、その位置を変更し、それをステージに追加するために必要なすべてのコードです。
+
+  rectangle.beginFill(0x66ccff);
+  rectangle.drawRect(0, 0, 64, 64);
+  rectangle.endFill();
+  rectangle.x = 440;
+  rectangle.y = 200;
+  container.addChild(rectangle);
+
+  rectangle.interactive = true;
+  rectangle.buttonMode = true;
+  rectangle.interactiveChildren = true;
+  rectangle.name = "rectangle";
+
+  // rectangle.visible = false; // visibleを使うとヒット判定も消える
+  rectangle.alpha = 0.3; // alpha0ならヒット判定は有効、rectangle click! rectangle
+
+  rectangle.on("tap", (e: InteractionEvent) => {
+    //console.log("card_6 tap!", e, "\n2:", e.target, "\n3:", e.currentTarget,"\n4:", e.target['name']);
+    console.log("rectangle tap!", e.target.name);
+  });
+  rectangle.on("click", (e: InteractionEvent) => {
+    console.log("rectangle click!", e.target.name);
+  });
+
   // app start
   gameLoopFlag = true;
   requestAnimationFrame(animate); // -> gameLoop start
@@ -248,8 +287,35 @@ const gameSetup = (resources: any): void => {
   console.log(cardgame.a); // 1
   // console.log(cardgame.b); // err
 
-  // 最初に使うカードの絵を選び、並び順をシャッフルする
+  // 最初に使うカードの絵を選び、並び順をシャッフルする（シャッフルボタン押下時も呼ばれる）
   cardgame.shuffle();
+
+  // カードを裏返しにして12枚並べる
+  // 枚数分、自動でオフセットとって並べる
+
+  // 当たり判定用の矩形を描画
+  // 表示用のカード画像を配置
+  let cards: PIXI.Sprite[] = [];
+
+  let cardMaxNumTemp: number = 12; // カードの最大枚数, 1-12
+
+  for (let i: number = 0; i < cardMaxNumTemp; i++) {
+    cards[i] = new PIXI.Sprite(id["pic_back.png"]);
+    cards[i].scale.x = cards[i].scale.y = 0.5;
+    cards[i].x = 30 + (i % 4) * 100 + 10; //10;
+    cards[i].y = 200 + (i % 3) * 100 + 10;
+    container.addChild(cards[i]);
+    cards[i].interactive = true;
+    cards[i].buttonMode = true;
+    cards[i].interactiveChildren = true;
+    cards[i].name = `cards_${i}`;
+    cards[i].on("tap", (e: InteractionEvent) => {
+      console.log("rectangle tap!", e.target.name);
+    });
+    cards[i].on("click", (e: InteractionEvent) => {
+      console.log("rectangle click!", e.target.name);
+    });
+  }
 };
 
 class CardGame {
@@ -377,6 +443,8 @@ class CardGame {
 
   /**
    * カードをシャッフルする
+   * ・使わない絵柄を1組決める
+   * ・それ以外をランダムに並べ替える
    */
   public shuffle(): void {
     // 変数の初期化
