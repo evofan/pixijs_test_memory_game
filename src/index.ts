@@ -120,6 +120,8 @@ let cards2nd: PIXI.Sprite[] = [];
 
 let rectangles: PIXI.Graphics[] = []; //new PIXI.Graphics();
 
+let mouseEnabled: boolean = true;
+
 if (ASSET_BG === "") {
   console.log("Don't use background image.");
 } else {
@@ -355,6 +357,41 @@ const gameSetup = (resources: any): void => {
     });
   }
 
+  for (let i: number = 0; i < cardMaxNumTemp; i++) {
+    // クリック用ヒットエリア
+    rectangles[i] = new PIXI.Graphics();
+    rectangles[i].lineStyle(1, 0xff3300, 1); // width, color, alpha
+    rectangles[i].beginFill(0x66ccff);
+    // rectangles[i].drawRect(0, 0, 90, 90);
+    rectangles[i].drawRect(0, 0, 50, 50);
+    rectangles[i].endFill();
+    //rectangles[i].x = 5 + (i % 4) * 110 + 10;
+    // rectangles[i].y = 305 + (i % 3) * 110 + 10;
+    rectangles[i].x = 30 + i * 50 + 10; //1
+    rectangles[i].y = 350; //
+    container.addChild(rectangles[i]);
+
+    rectangles[i].interactive = true;
+    rectangles[i].buttonMode = true;
+    rectangles[i].interactiveChildren = true;
+    rectangles[i].name = `rectangle_${i}`;
+
+    // rectangle.visible = false; // visibleを使うとヒット判定も消える
+    rectangles[i].alpha = 0.3; // alpha0ならヒット判定は有効、rectangle click! rectangle
+
+    rectangles[i].on("tap", (e: InteractionEvent) => {
+      //console.log("card_6 tap!", e, "\n2:", e.target, "\n3:", e.currentTarget,"\n4:", e.target['name']);
+      console.log("rectangle tap!", e.target.name);
+      cardgame.mousePressed(e);
+    });
+    rectangles[i].on("click", (e: InteractionEvent) => {
+      if (mouseEnabled) {
+        console.log("rectangle click!", e.target.name);
+        cardgame.mousePressed(e);
+      }
+    });
+  }
+
   // カードを初期化する
   cardgame.init();
 
@@ -417,6 +454,10 @@ class CardGame {
   public cardMargin: number = 10; // カード画像を並べる時の余白
 
   public card1st2ndFlag: boolean[] = []; // 同一絵柄の1枚目のカードか2枚目のカードか
+  public cardAll: PIXI.Sprite[] = []; // 1stと2ndを連番で格納したもの
+  public openCardSprite: PIXI.Sprite[] = [];
+
+  public selectNumBefore:number=-1;
 
   /**
    * 初期化する
@@ -433,6 +474,8 @@ class CardGame {
 
     // shuffle();
     // マウスリスナーとして自分を登録
+
+    this.count = 0;
   }
 
   public paint(): void {
@@ -449,43 +492,49 @@ class CardGame {
     //console.log();
     //this.stat[2] = 2;
     //this.stat[6] = 2;
-  
-   // 表を表示するテスト
-  this.stat = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2];
-  
-  
-   // カードの描画
+
+    // 表を表示するテスト
+    // this.stat = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2];
+
+    // カードの描画
     console.log("this.stat: ", this.stat);
     for (let i: number = 0; i < this.cardMaxNum; i++) {
-      if (this.stat[i] === 0) {
-        // 裏側の絵を描く
-        cards_back[i].x = 30 + i * 50 + 10;
-        cards_back[i].y = 500;
-      } else if (this.stat[i] === 2) {
-        if (this.card1st2ndFlag[this.card[i]] === false) {
-          console.log("1枚目が出たのでフラグをtrueに");
+      //if (this.stat[i] === 0) {
+      // 裏側の絵を描く
+      cards_back[i].x = 30 + i * 50 + 10;
+      cards_back[i].y = 400;
 
-          this.card1st2ndFlag[this.card[i]] = true;
+      //      } else if (this.stat[i] === 2) {
+      if (this.card1st2ndFlag[this.card[i]] === false) {
+        console.log("1枚目が出たのでフラグをtrueに");
 
-          // 表側の絵を描く
-          cards1st[this.card[i]].x = 30 + i * 50 + 10;
-          cards1st[this.card[i]].y = 500;
-        } else {
-          console.log("2枚目の方の画像を表示");
-          // 表側の絵を描く
-          cards2nd[this.card[i]].x = 30 + i * 50 + 10;
-          cards2nd[this.card[i]].y = 500;
-        }
+        this.card1st2ndFlag[this.card[i]] = true;
+
+        // 表側の絵を描く
+        cards1st[this.card[i]].x = 30 + i * 50 + 10;
+        cards1st[this.card[i]].y = 500;
+        this.cardAll.push(cards1st[this.card[i]]);
+      } else {
+        console.log("2枚目の方の画像を表示");
+        // 表側の絵を描く
+        cards2nd[this.card[i]].x = 30 + i * 50 + 10;
+        cards2nd[this.card[i]].y = 500;
+        this.cardAll.push(cards2nd[this.card[i]]);
       }
+      // }
     }
+    console.log("this.cardAll: ", this.cardAll);
 
     // シャッフルボタンの描画
   }
 
-  public mousePressed(e: MouseEvent): void {
+  public mousePressed(e: InteractionEvent): void {
     // マウスが押された座標を得る →★直に押したスプライトで取得？
-    let ix: number = e.movementX;
-    let iy: number = e.movementY;
+    console.log("mousePressed() ", e, e.target.name);
+
+    mouseEnabled = false;
+    //let ix: number = e.movementX;
+    //let iy: number = e.movementY;
 
     // 押した座標がシャッフルボタンの場合、カードをセットし直す →★直に押したボタンから飛ぶ？
     // if(){
@@ -494,16 +543,94 @@ class CardGame {
     // }
 
     // 1枚目のカードをひっくり返す前の処理＝前回のカードを裏返しにする
+    /*
     for (let i: number = 0; i < this.cardMaxNum; i++) {
       if (this.stat[i] === 1) {
         // 前回ひっくり返されたカードを元に戻す（前回一致:2のｊカードはそのまま）
         this.stat[i] = 0; // 裏に
-        // repaint（再描画で裏の絵に）
+        // repaint（再描画で裏の絵に）// ★前回ひっくり返したstat=1のみ裏側に戻す→stat=2で揃ってるのは戻さない
       }
     }
+    */
+    console.log("stat: ", this.stat);
 
     // 今回ひっくり返すカードの処理
     // 元のコードではマウスの押された座標から、行と列を割り出し、その値を使用して指定のカードを決定
+
+    console.log("今回ひっくり返すカードの処理");
+    let tempStr: string = String(e.target.name);
+    let selectNum: number = Number(tempStr.substr(10));
+    console.log("selectNum: ", selectNum);
+
+    // 1枚目のカードをひっくり返す処理
+    if (this.count === 0) {
+
+      for (let i: number = 0; i < this.cardMaxNum; i++) {
+        if (this.stat[i] === 1) {
+          // 前回ひっくり返されたカードを元に戻す（前回一致:2のｊカードはそのまま）
+          this.stat[i] = 0; // 裏に
+          // repaint（再描画で裏の絵に）// ★前回ひっくり返したstat=1のみ裏側に戻す→stat=2で揃ってるのは戻さない
+        }
+      }
+
+      this.openCardSprite = [];
+      this.openCard[0]=-1;
+      this.openCard[1]=-1;
+      this.selectNumBefore =1;
+
+      console.log("1枚目のカードをひっくり返す処理");
+      if (this.stat[selectNum] === 0) {
+        console.log("裏→今ひっ繰り返した状態に");
+        this.stat[selectNum] = 1; // 今ひっ繰り返した状態
+
+        this.openCard[0] = this.card[selectNum];
+        console.log("this.openCard[0]: ",this.openCard[0]);
+        console.log("this.openCard[this.count]", this.openCard[this.count]);
+
+        this.openCardSprite[0] = this.cardAll[selectNum];
+        console.log("this.openCardSprite[0]: ",this.openCardSprite[0].name);
+      }
+      console.log("stat[1枚目後]: ", this.stat);
+      this.selectNumBefore = selectNum;
+    }
+
+
+    // 2枚目のカードをひっくり返す処理
+    else if (this.count === 1) {
+      console.log("2枚目のカードをひっくり返す処理");
+      this.stat[selectNum] = 1; // 今ひっ繰り返した状態
+
+      this.openCard[1] = this.card[selectNum];
+      console.log("this.openCard[1]: ",this.openCard[1]);
+      console.log("this.openCard[this.count]", this.openCard[this.count]);
+
+      this.openCardSprite[1] = this.cardAll[selectNum];
+      console.log("this.openCardSprite[1]: ",this.openCardSprite[1].name);
+
+      console.log("ここで1枚目と2枚目のカードを表示: ",this.openCard[0] ,this.openCard[1]);
+
+      if (this.openCard[0] === this.openCard[1]) {
+        console.log("絵が一致したらカードの状態を表に固定する");
+        // 絵が一致したらカードの状態を表に固定する
+        this.stat[this.selectNumBefore] = 2;
+        this.stat[selectNum] = 2;
+        // 下に移動（仮
+        //this.cardAll[this.openCard[0].y +=100
+        console.log("this.openCardSprite[0].name: ",this.openCardSprite[0].name);
+        console.log("this.openCardSprite[1].name: ",this.openCardSprite[1].name);
+        this.openCardSprite[0].y += 100;
+        this.openCardSprite[1].y += 100;
+        // 選択ボタンも押せないようにする、最終的には消すか領域外にするかmouseEnabedを消してα0.1にするとか
+        // ★あと同じカードを2回続けて押せないようにする→1個で揃った判定になるので
+        rectangles[this.selectNumBefore].y -= 100;
+        rectangles[selectNum].y -= 100;
+      } else {
+        console.log("絵が一致しないので元に戻す、sleepで数秒後に？");
+      }
+      console.log("stat[2枚目後]: ", this.stat);
+    }
+
+    /*
     let col: number = 0,
       row: number = 0;
 
@@ -529,13 +656,28 @@ class CardGame {
           }
         }
       }
+      */
 
-      // 現在何枚のカードがひっくり返されたか
-      this.count = this.count + 1;
-      if (this.count === 2) {
-        this.count = 0;
+    // 現在何枚のカードがひっくり返されたか
+    this.count = this.count + 1;
+    if (this.count === 2) {
+      this.count = 0;
+      this.openCardSprite = [];
+      this.openCard[0]=-1;
+      this.openCard[1]=-1;
+      /*
+      for (let i: number = 0; i < this.cardMaxNum; i++) {
+        if (this.stat[i] === 1) {
+          // 前回ひっくり返されたカードを元に戻す（前回一致:2のｊカードはそのまま）
+          this.stat[i] = 0; // 裏に
+          // repaint（再描画で裏の絵に）// ★前回ひっくり返したstat=1のみ裏側に戻す→stat=2で揃ってるのは戻さない
+        }
       }
+      */
+      // クリア判定
     }
+    
+    mouseEnabled = true;
   }
 
   public mouseReleased(e: MouseEvent): void {
