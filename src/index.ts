@@ -401,12 +401,15 @@ class CardGame {
 
   public selectNumBefore: number = -1;
 
+  public rect1st: any = null;
+  public rect2nd: any = null;
+
   /**
    * 初期化する
    */
   public init(): void {
     console.log("init()");
-    // カードを並べる（カードのx,y座標を設定）
+    // カードを並べる（カードのx, y座標を設定）
     // カードをセットする
     for (let i: number = 0; i < this.cardMaxNum; i++) {
       this.stat[i] = 0; // 全部を裏側に
@@ -472,7 +475,7 @@ class CardGame {
    * カードがクリック又はタップされた時に呼ばれる
    * @param e
    */
-  public onClickTap(e: InteractionEvent): void {
+  public async onClickTap(e: InteractionEvent) {
     // マウスが押された座標を得る →★直に押したスプライトで取得？
     console.log("onClickTap() ", e, e.target.name);
 
@@ -508,6 +511,11 @@ class CardGame {
 
     // 1枚目のカードをひっくり返す処理
     if (this.count === 0) {
+      // 矩形をマウス押下出来ないようにする
+      // e.target.visible = false;
+      this.rect1st = e.target;
+      this.rect1st.visible = false;
+
       for (let i: number = 0; i < this.cardMaxNum; i++) {
         if (this.stat[i] === CARD_OPEN) {
           // 前回ひっくり返されたカードを元に戻す（前回一致:2のｊカードはそのまま）
@@ -541,6 +549,9 @@ class CardGame {
     else if (this.count === 1) {
       console.log("2枚目のカードをひっくり返す処理");
       this.stat[selectNum] = CARD_OPEN; // 今ひっ繰り返した状態
+
+      this.rect2nd = e.target;
+      this.rect2nd.visible = false;
 
       this.openCard[1] = this.card[selectNum];
       console.log("this.openCard[1]: ", this.openCard[1]);
@@ -576,8 +587,12 @@ class CardGame {
         // ★あと同じカードを2回続けて押せないようにする→1個で揃った判定になるので
         rectangles[this.selectNumBefore].y -= 100;
         rectangles[selectNum].y -= 100;
+        this.rect1st.y = 450; // 領域外に？
       } else {
         console.log("絵が一致しないので元に戻す、sleepで数秒後に？");
+        await this.sleep(2000);
+        this.rect1st.visible = true; // 裏を表示
+        this.rect2nd.visible = true; // 裏を表示 // 特に2枚目をすぐに戻すとめくったカードが一瞬しか見えず分からない
       }
       console.log("stat[2枚目後]: ", this.stat);
     }
@@ -617,6 +632,8 @@ class CardGame {
       this.openCardSprite = [];
       this.openCard[0] = -1;
       this.openCard[1] = -1;
+      this.rect1st = null;
+      this.rect2nd = null;
       /*
       for (let i: number = 0; i < this.cardMaxNum; i++) {
         if (this.stat[i] === 1) {
@@ -681,4 +698,10 @@ class CardGame {
     mouseEnabled = false;
     // ゲームクリア処理
   }
+
+  private sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
 }
+
+// マウスオーバーで数pixelカードが上がって、アウトで下がるとか
