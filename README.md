@@ -9,3 +9,6 @@ reference
 
 **楽しく学べるJavaゲーム・アプレット 第3版**  
 [https://www.kohgakusha.co.jp/books/detail/978-4-7775-1161-7](https://www.kohgakusha.co.jp/books/detail/978-4-7775-1161-7)  
+
+**What is the JavaScript version of sleep()? - Stack Overflow**  
+[https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep](https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep)  
