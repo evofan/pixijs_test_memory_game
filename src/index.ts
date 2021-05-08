@@ -397,12 +397,14 @@ class CardGame {
 
   public card1st2ndFlag: boolean[] = []; // 同一絵柄の1枚目のカードか2枚目のカードか
   public cardAll: PIXI.Sprite[] = []; // 1stと2ndを連番で格納したもの
-  public openCardSprite: PIXI.Sprite[] = [];
+  public openCardSprite: PIXI.Sprite[] = []; // 1枚目と2枚目に開いたカードのスプライト画像
 
-  public selectNumBefore: number = -1;
+  public selectNumBefore: number = -1; // 1枚目にめくったカード番号
 
-  public rect1st: any = null;
-  public rect2nd: any = null;
+  public rect1st: any = null; // 1枚目のヒット領域、カード選択時は続けて押せないように
+  public rect2nd: any = null; // 2枚目のヒット領域、カード選択時は続けて押せないように
+
+  public leftNum: number = this.cardMaxNum; // 残りカード枚数、0枚になったらクリア
 
   /**
    * 初期化する
@@ -534,6 +536,8 @@ class CardGame {
         console.log("裏→今ひっ繰り返した状態に");
         this.stat[selectNum] = CARD_OPEN; // 今ひっ繰り返した状態
 
+        cards_back[selectNum].visible = false; // カード裏画像を非表示に＝下に重なっていたカードの表が見える
+
         this.openCard[0] = this.card[selectNum];
         console.log("this.openCard[0]: ", this.openCard[0]);
         console.log("this.openCard[this.count]", this.openCard[this.count]);
@@ -552,6 +556,8 @@ class CardGame {
 
       this.rect2nd = e.target;
       this.rect2nd.visible = false;
+
+      cards_back[selectNum].visible = false; // カード裏画像を非表示に＝下に重なっていたカードの表が見える
 
       this.openCard[1] = this.card[selectNum];
       console.log("this.openCard[1]: ", this.openCard[1]);
@@ -588,11 +594,18 @@ class CardGame {
         rectangles[this.selectNumBefore].y -= 100;
         rectangles[selectNum].y -= 100;
         this.rect1st.y = 450; // 領域外に？
+        this.leftNum -= 2;
+        console.log("this.leftNum: ", this.leftNum);
+        if (this.leftNum === 0) {
+          this.clearGame();
+        }
       } else {
         console.log("絵が一致しないので元に戻す、sleepで数秒後に？");
         await this.sleep(2000);
-        this.rect1st.visible = true; // 裏を表示
-        this.rect2nd.visible = true; // 裏を表示 // 特に2枚目をすぐに戻すとめくったカードが一瞬しか見えず分からない
+        this.rect1st.visible = true; // 矩形をイネーブルに
+        this.rect2nd.visible = true; // 矩形をイネーブルに // 特に2枚目をすぐに戻すとめくったカードが一瞬しか見えず分からない
+        cards_back[this.selectNumBefore].visible = true;
+        cards_back[selectNum].visible = true;
       }
       console.log("stat[2枚目後]: ", this.stat);
     }
@@ -628,6 +641,7 @@ class CardGame {
     // 現在何枚のカードがひっくり返されたか
     this.count = this.count + 1;
     if (this.count === 2) {
+      // 2枚ひっくり返したらリセット
       this.count = 0;
       this.openCardSprite = [];
       this.openCard[0] = -1;
@@ -693,12 +707,19 @@ class CardGame {
     console.log(`this.card（並べ替え後）: ${this.card}`); // ex. this.card（並べ替え後）: 5,3,6,1,0,4,5,1,3,6,4,0
   }
 
-  private clearGame() {
+  /**
+   * ゲームクリア処理
+   */
+  private clearGame(): void {
     console.log("clearGame()");
     mouseEnabled = false;
-    // ゲームクリア処理
   }
 
+  /**
+   * 数秒待つ
+   * @param ms
+   * @returns
+   */
   private sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
