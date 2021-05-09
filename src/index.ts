@@ -35,14 +35,6 @@ const WIDTH: number = STAGES.WIDTH;
 const HEIGHT: number = STAGES.HEIGHT;
 const BG_COLOR: number = STAGES.BG_COLOR;
 
-const BOUNDARY_RANGE_X: number = 28;
-const BOUNDARY_RANGE_Y: number = 10;
-const BOUNDARY_RANGE_WIDTH: number = 488;
-const BOUNDARY_RANGE_HEIGHT: number = 488;
-
-const FIRST = 1;
-const NOT_FIRST = 2;
-
 const CARD_CLOSED: number = 0;
 const CARD_OPEN: number = 1;
 const CARD_COMPLETED: number = 2;
@@ -101,22 +93,31 @@ container.interactiveChildren = true;
 container.buttonMode = false;
 stage.addChild(container);
 
+// 全体ボタンモードオフ用
+let buttonOffRect: PIXI.Graphics = new PIXI.Graphics();
+buttonOffRect.lineStyle(1, 0xff0033, 1); // width, color, alpha
+buttonOffRect.beginFill(0xff0033);
+buttonOffRect.drawRect(0, 0, WIDTH, HEIGHT);
+buttonOffRect.endFill();
+buttonOffRect.alpha = 0;
+buttonOffRect.visible = false;
+buttonOffRect.interactive = true;
+buttonOffRect.interactiveChildren = false;
+buttonOffRect.buttonMode = false;
+// container.addChild(buttonOffRect);
+
 // init
 let bg: PIXI.Sprite;
 
 let gameLoopFlag: boolean = false;
 
-let card_back: PIXI.Sprite;
-let card_0: PIXI.Sprite;
-let card_1: PIXI.Sprite;
-let card_2: PIXI.Sprite;
-let card_3: PIXI.Sprite;
-let card_4: PIXI.Sprite;
-let card_5: PIXI.Sprite;
-let card_6: PIXI.Sprite;
-
 // text
 let text_pixiVersion: PIXI.Text;
+
+let gameClearScene: PIXI.Container = new PIXI.Container();
+let message_gameclear: PIXI.Text;
+
+// let coverScene: PIXI.Container = new PIXI.Container();
 
 let cards_back: PIXI.Sprite[] = []; // 裏側の図柄のカード
 let cards1st: PIXI.Sprite[] = []; // ペアのカード図柄の1枚目のカード
@@ -128,6 +129,14 @@ let mouseEnabled: boolean = true; // ボタン連打防止用
 
 let cardPicMaxNumTemp: number = 7; // カードの図柄の最大枚数, 0-6
 let cardMaxNumTemp: number = 12; // カードの最大枚数, 1-12
+
+let offsetX: number = 100; // カードを並べ始めるx起点（画面左上から）
+let offsetY: number = 100; // カードを並べ始めるy起点（画面左上から）
+let cardCols: number = 4;
+let cardRows: number = 3;
+let cardWidth: number = 50;
+let cardHeight: number = 50;
+let cardOffset: number = 10;
 
 if (ASSET_BG === "") {
   console.log("Don't use background image.");
@@ -145,6 +154,23 @@ loader.load((loader: PIXI.Loader, resources: any) => {
     bg = new PIXI.Sprite(resources.bg_data.texture);
     container.addChild(bg);
   }
+
+  container.addChild(gameClearScene);
+  gameClearScene.visible = false;
+
+  let style: PIXI.TextStyle = new PIXI.TextStyle({
+    fontFamily: "Futura",
+    fontSize: 64,
+    fill: "white",
+  });
+  message_gameclear = new PIXI.Text("Game Clear!", style);
+  message_gameclear.x = WIDTH / 2;
+  message_gameclear.y = HEIGHT / 2;
+  message_gameclear.anchor.set(0.5, 0.5);
+  message_gameclear.scale.x = 0.5;
+  message_gameclear.scale.y = 0.5;
+  message_gameclear.alpha = 1; // TODO: tween
+  gameClearScene.addChild(message_gameclear);
 
   gameSetup(resources);
 });
@@ -169,175 +195,52 @@ const gameLoop = (delta: number): void => {
 const gameSetup = (resources: any): void => {
   console.log("gameSetup()");
 
-  // set sprite sheet(texture atras frame)
-  let id: any = resources.obj_1_data.textures;
-
   // Create card sprite
 
-  // back
-  card_back = new PIXI.Sprite(id["pic_back.png"]);
-  card_back.scale.x = card_back.scale.y = 0.5;
-  card_back.x = 10;
-  card_back.y = 10;
-  container.addChild(card_back);
-
-  // 0
-  card_0 = new PIXI.Sprite(id["pic_0.png"]);
-  card_0.scale.x = card_0.scale.y = 0.5;
-  card_0.x = 120;
-  card_0.y = 10;
-  container.addChild(card_0);
-
-  // 1
-  card_1 = new PIXI.Sprite(id["pic_1.png"]);
-  card_1.scale.x = card_1.scale.y = 0.5;
-  card_1.x = 230;
-  card_1.y = 10;
-  container.addChild(card_1);
-
-  // 2
-  card_2 = new PIXI.Sprite(id["pic_2.png"]);
-  card_2.scale.x = card_2.scale.y = 0.5;
-  card_2.x = 340;
-  card_2.y = 10;
-  container.addChild(card_2);
-
-  // 3
-  card_3 = new PIXI.Sprite(id["pic_3.png"]);
-  card_3.scale.x = card_3.scale.y = 0.5;
-  card_3.x = 10;
-  card_3.y = 120;
-  container.addChild(card_3);
-
-  // 4
-  card_4 = new PIXI.Sprite(id["pic_4.png"]);
-  card_4.scale.x = card_4.scale.y = 0.5;
-  card_4.x = 120;
-  card_4.y = 120;
-  container.addChild(card_4);
-
-  // 5
-  card_5 = new PIXI.Sprite(id["pic_5.png"]);
-  card_5.scale.x = card_5.scale.y = 0.5;
-  card_5.x = 230;
-  card_5.y = 120;
-  container.addChild(card_5);
-
-  // 6
-  card_6 = new PIXI.Sprite(id["pic_6.png"]);
-  card_6.scale.x = card_6.scale.y = 0.5;
-  card_6.x = 340;
-  card_6.y = 120;
-  container.addChild(card_6);
-  // temp
-  card_6.interactive = true;
-  card_6.buttonMode = true;
-  card_6.interactiveChildren = true;
-  card_6.name = "card_6"; // name: "card_6"
-
-  card_6.on("tap", (e: InteractionEvent) => {
-    //console.log("card_6 tap!", e, "\n2:", e.target, "\n3:", e.currentTarget,"\n4:", e.target['name']);
-    console.log("card_6 tap!", e.target.name);
-  });
-  card_6.on("click", (e: InteractionEvent) => {
-    console.log("card_6 click!", e.target.name);
-  });
-  /*
-  InteractionEvent {stopped: false, stopsPropagatingAt: null, stopPropagationHint: false, target: Sprite, currentTarget: Sprite, …}
-  currentTarget: null
-  data: InteractionData {pressure: 0, rotationAngle: false, twist: 0, tangentialPressure: 0, global: Point, …}
-  stopPropagationHint: false
-  stopped: false
-  stopsPropagatingAt: null
-  target: null
-  type: "tap"
-  */
-
-  // test rect
-  // 25.長方形
-  // すべての形状は、最初にPixiのGraphicsクラス（PIXI.Graphics）の新しいインスタンスを作成することによって作られます。
-  let rectangle: PIXI.Graphics = new PIXI.Graphics();
-  // 図形に輪郭を付ける場合は、lineStyleメソッドを使用します。四角形の幅4ピクセルの赤い輪郭をアルファ値1で指定する方法は次のとおりです。
-  rectangle.lineStyle(4, 0xff3300, 1); // width, color, alpha
-
-  // 長方形を描画するには、drawRect()メソッドを使用します。その4つの引数は、x、y、width、およびheightです。
-  // rectangle.drawRect(x, y, width, height);
-
-  // 終了したらendFill()を使用します。
-
-  // Canvas Drawing APIとまったく同じです。
-  // これが、四角形を描画し、その位置を変更し、それをステージに追加するために必要なすべてのコードです。
-
-  rectangle.beginFill(0x66ccff);
-  rectangle.drawRect(0, 0, 64, 64);
-  rectangle.endFill();
-  rectangle.x = 440;
-  rectangle.y = 200;
-  container.addChild(rectangle);
-
-  rectangle.interactive = true;
-  rectangle.buttonMode = true;
-  rectangle.interactiveChildren = true;
-  rectangle.name = "rectangle";
-
-  // rectangle.visible = false; // visibleを使うとヒット判定も消える
-  rectangle.alpha = 0.3; // alpha0ならヒット判定は有効、rectangle click! rectangle
-
-  rectangle.on("tap", (e: InteractionEvent) => {
-    //console.log("card_6 tap!", e, "\n2:", e.target, "\n3:", e.currentTarget,"\n4:", e.target['name']);
-    console.log("rectangle tap!", e.target.name);
-  });
-  rectangle.on("click", (e: InteractionEvent) => {
-    console.log("rectangle click!", e.target.name);
-  });
-
-  // app start
-  gameLoopFlag = true;
-  requestAnimationFrame(animate); // -> gameLoop start
+  // set sprite sheet(texture atras frame)
+  let id: any = resources.obj_1_data.textures;
 
   // カードの図柄のスプライトを登録する（ペアの1枚目）
   for (let i: number = 0; i < cardPicMaxNumTemp; i++) {
     cards1st[i] = new PIXI.Sprite(id[`pic_${i}.png`]);
     cards1st[i].scale.x = cards1st[i].scale.y = 0.25;
-    cards1st[i].x = 30 + i * 50 + 10;
-    cards1st[i].y = 300;
+    cards1st[i].x = -1000;
+    cards1st[i].y = -1000;
     container.addChild(cards1st[i]);
     cards1st[i].name = `cards1st_${i}`;
   }
 
   // カードの図柄のスプライトを登録する（ペアの2枚目）
   for (let j: number = 0; j < cardPicMaxNumTemp; j++) {
-    console.log("j: ", j);
     cards2nd[j] = new PIXI.Sprite(id[`pic_${j}.png`]);
     cards2nd[j].scale.x = cards2nd[j].scale.y = 0.25;
-    cards2nd[j].x = 30 + j * 50 + 10;
-    cards2nd[j].y = 300;
+    cards2nd[j].x = -1000;
+    cards2nd[j].y = -1000;
     container.addChild(cards2nd[j]);
     cards2nd[j].name = `cards2nd_${j}`;
   }
 
-  // 背景画像のスプライトをカード枚数分作成する
+  // カードの背景画像のスプライトをカード枚数分作成する
   for (let i: number = 0; i < cardMaxNumTemp; i++) {
     cards_back[i] = new PIXI.Sprite(id["pic_back.png"]);
     cards_back[i].scale.x = cards_back[i].scale.y = 0.25;
-    cards_back[i].x = 30 + i * 50 + 10; //10;/////////////
-    cards_back[i].y = 200;
+    cards_back[i].x = -1000;
+    cards_back[i].y = -1000;
     container.addChild(cards_back[i]);
     cards_back[i].name = `cards_back_${i}`;
   }
 
-  // クリック用ヒットエリア
+  // クリック・タップ判定用の矩形領域ｄ（ヒットエリア）を作成
   for (let i: number = 0; i < cardMaxNumTemp; i++) {
     rectangles[i] = new PIXI.Graphics();
     rectangles[i].lineStyle(1, 0xff3300, 1); // width, color, alpha
     rectangles[i].beginFill(0x66ccff);
-    // rectangles[i].drawRect(0, 0, 90, 90);
     rectangles[i].drawRect(0, 0, 50, 50);
     rectangles[i].endFill();
-    //rectangles[i].x = 5 + (i % 4) * 110 + 10;
-    // rectangles[i].y = 305 + (i % 3) * 110 + 10;
-    rectangles[i].x = 30 + i * 50 + 10; //1
-    rectangles[i].y = 350; //
+    rectangles[i].x = offsetX + (i % cardCols) * (cardWidth + cardOffset);
+    rectangles[i].y = offsetY + (i % cardRows) * (cardHeight + cardOffset);
+    //rectangles[i].x = 30 + i * 50 + 10;
+    //rectangles[i].y = 350;
     container.addChild(rectangles[i]);
 
     rectangles[i].interactive = true;
@@ -346,12 +249,13 @@ const gameSetup = (resources: any): void => {
     rectangles[i].name = `rectangle_${i}`;
 
     // rectangle.visible = false; // visibleを使うとヒット判定も消える
-    rectangles[i].alpha = 0.3; // alpha0ならヒット判定は有効、rectangle click! rectangle
+    rectangles[i].alpha = 0.3; // alpha0ならヒット判定は有効
 
     rectangles[i].on("tap", (e: InteractionEvent) => {
-      //console.log("card_6 tap!", e, "\n2:", e.target, "\n3:", e.currentTarget,"\n4:", e.target['name']);
-      console.log("rectangle tap!", e.target.name);
-      cardgame.onClickTap(e);
+      if (mouseEnabled) {
+        console.log("rectangle tap!", e.target.name);
+        cardgame.onClickTap(e);
+      }
     });
     rectangles[i].on("click", (e: InteractionEvent) => {
       if (mouseEnabled) {
@@ -372,6 +276,10 @@ const gameSetup = (resources: any): void => {
 
   // カードを全部並べる
   cardgame.update();
+
+  // app start
+  gameLoopFlag = true;
+  requestAnimationFrame(animate); // -> gameLoop start
 };
 
 /**
@@ -401,7 +309,7 @@ class CardGame {
 
   public selectNumBefore: number = -1; // 1枚目にめくったカード番号
 
-  public rect1st: any = null; // 1枚目のヒット領域、カード選択時は続けて押せないように
+  public rect1st: any = null; // 1枚目のヒット領域、カード選択時は続けて押せないように、★visibleで制御に変更したら削除
   public rect2nd: any = null; // 2枚目のヒット領域、カード選択時は続けて押せないように
 
   public leftNum: number = this.cardMaxNum; // 残りカード枚数、0枚になったらクリア
@@ -447,8 +355,9 @@ class CardGame {
     for (let i: number = 0; i < this.cardMaxNum; i++) {
       //if (this.stat[i] === 0) {
       // 裏側の絵を描く
-      cards_back[i].x = 30 + i * 50 + 10;
-      cards_back[i].y = 400; // ★最終的にはカードと合わせる、0でない場合はvisibleで消すか、最初の一回だけ裏側描画にする
+      cards_back[i].x = offsetX + (i % cardCols) * (cardWidth + cardOffset);
+      cards_back[i].y = offsetY + (i % cardRows) * (cardHeight + cardOffset);
+      // ★最終的にはカードと合わせる、0でない場合はvisibleで消すか、最初の一回だけ裏側描画にする
 
       //      } else if (this.stat[i] === 2) {
       if (this.card1st2ndFlag[this.card[i]] === false) {
@@ -456,14 +365,14 @@ class CardGame {
         this.card1st2ndFlag[this.card[i]] = true;
         console.log("ペアの1枚目の方のカード画像を表示");
         // 表側の絵を描く
-        cards1st[this.card[i]].x = 30 + i * 50 + 10;
-        cards1st[this.card[i]].y = 500;
+        cards1st[this.card[i]].x = offsetX + (i % cardCols) * (cardWidth + cardOffset);
+        cards1st[this.card[i]].y = offsetY + (i % cardRows) * (cardHeight + cardOffset);
         this.cardAll.push(cards1st[this.card[i]]);
       } else {
         console.log("ペアの2枚目の方のカード画像を表示");
         // 表側の絵を描く
-        cards2nd[this.card[i]].x = 30 + i * 50 + 10;
-        cards2nd[this.card[i]].y = 500;
+        cards2nd[this.card[i]].x = offsetX + (i % cardCols) * (cardWidth + cardOffset);
+        cards2nd[this.card[i]].y = offsetY + (i % cardRows) * (cardHeight + cardOffset);
         this.cardAll.push(cards2nd[this.card[i]]);
       }
       // }
@@ -478,7 +387,6 @@ class CardGame {
    * @param e
    */
   public async onClickTap(e: InteractionEvent) {
-    // マウスが押された座標を得る →★直に押したスプライトで取得？
     console.log("onClickTap() ", e, e.target.name);
 
     mouseEnabled = false;
@@ -552,6 +460,11 @@ class CardGame {
     // 2枚目のカードをひっくり返す処理
     else if (this.count === 1) {
       console.log("2枚目のカードをひっくり返す処理");
+
+      // ボタンオフに
+      container.addChild(buttonOffRect);
+      buttonOffRect.visible = true;
+
       this.stat[selectNum] = CARD_OPEN; // 今ひっ繰り返した状態
 
       this.rect2nd = e.target;
@@ -587,8 +500,15 @@ class CardGame {
           "this.openCardSprite[1].name: ",
           this.openCardSprite[1].name
         );
-        this.openCardSprite[0].y += 100;
-        this.openCardSprite[1].y += 100;
+
+        // ちょっと待ってから右下に移動？エフェクトも欲しい
+        await this.sleep(2000);
+        this.openCardSprite[0].x = 100 + (this.cardMaxNum - this.leftNum) * 5;
+        this.openCardSprite[0].y = 300;
+        this.openCardSprite[1].x = 110 + (this.cardMaxNum - this.leftNum) * 5;
+        this.openCardSprite[1].y = 310;
+        container.addChild(this.openCardSprite[0]);
+        container.addChild(this.openCardSprite[1]);
         // 選択ボタンも押せないようにする、最終的には消すか領域外にするかmouseEnabedを消してα0.1にするとか
         // ★あと同じカードを2回続けて押せないようにする→1個で揃った判定になるので
         rectangles[this.selectNumBefore].y -= 100;
@@ -596,6 +516,8 @@ class CardGame {
         this.rect1st.y = 450; // 領域外に？
         this.leftNum -= 2;
         console.log("this.leftNum: ", this.leftNum);
+        // ボタンオンに
+        container.removeChild(buttonOffRect);
         if (this.leftNum === 0) {
           this.clearGame();
         }
@@ -606,6 +528,8 @@ class CardGame {
         this.rect2nd.visible = true; // 矩形をイネーブルに // 特に2枚目をすぐに戻すとめくったカードが一瞬しか見えず分からない
         cards_back[this.selectNumBefore].visible = true;
         cards_back[selectNum].visible = true;
+        // ボタンオンに
+        container.removeChild(buttonOffRect);
       }
       console.log("stat[2枚目後]: ", this.stat);
     }
@@ -648,16 +572,6 @@ class CardGame {
       this.openCard[1] = -1;
       this.rect1st = null;
       this.rect2nd = null;
-      /*
-      for (let i: number = 0; i < this.cardMaxNum; i++) {
-        if (this.stat[i] === 1) {
-          // 前回ひっくり返されたカードを元に戻す（前回一致:2のｊカードはそのまま）
-          this.stat[i] = 0; // 裏に
-          // repaint（再描画で裏の絵に）// ★前回ひっくり返したstat=1のみ裏側に戻す→stat=2で揃ってるのは戻さない
-        }
-      }
-      */
-      // クリア判定
     }
 
     mouseEnabled = true; // 連打防止用、他の方法でもいいかも
@@ -713,6 +627,7 @@ class CardGame {
   private clearGame(): void {
     console.log("clearGame()");
     mouseEnabled = false;
+    gameClearScene.visible = true;
   }
 
   /**
