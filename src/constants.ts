@@ -13,7 +13,7 @@ export const ASSETS: {
 } = {
   ASSET_BG: "assets/images/pic_bg_redcover_800x800.jpg",
   ASSET_OBJ1: "assets/images/cards_trumpx20.json",
-  ASSET_OBJ2: "assets/images/pic_gametitle.png",
+  ASSET_OBJ2: "assets/images/pic_gametitle2.png",
 };
 
 export const GAMES: { FPS: number } = {

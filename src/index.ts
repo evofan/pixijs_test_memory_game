@@ -133,7 +133,7 @@ let cardPicMaxNumTemp: number = 7; // カードの図柄の最大枚数, 0-6
 let cardMaxNumTemp: number = 12; // カードの最大枚数, 1-12
 
 let offsetX: number = 100; // カードを並べ始めるx起点（画面左上から）
-let offsetY: number = 100; // カードを並べ始めるy起点（画面左上から）
+let offsetY: number = 110; // カードを並べ始めるy起点（画面左上から）
 let cardCols: number = 4;
 let cardRows: number = 3;
 let cardWidth: number = 92;
@@ -160,8 +160,8 @@ loader.load((loader: PIXI.Loader, resources: any) => {
 
   // title
   pic_gametitle = new PIXI.Sprite(resources.obj_2_data.texture);
-  pic_gametitle.scale.x = 0.5;
-  pic_gametitle.scale.y = 0.5;
+  pic_gametitle.scale.x = 0.75;
+  pic_gametitle.scale.y = 0.75;
   pic_gametitle.x = WIDTH / 2 - pic_gametitle.width / 2;
   pic_gametitle.y = 20;
 
