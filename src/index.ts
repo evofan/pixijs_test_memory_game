@@ -80,6 +80,11 @@ let loader: PIXI.Loader = new PIXI.Loader();
 const ASSET_BG: string = ASSETS.ASSET_BG;
 const ASSET_OBJ1: string = ASSETS.ASSET_OBJ1;
 const ASSET_OBJ2: string = ASSETS.ASSET_OBJ2;
+const ASSET_OBJ3: string = ASSETS.ASSET_OBJ3;
+const ASSET_OBJ4: string = ASSETS.ASSET_OBJ4;
+const ASSET_OBJ5: string = ASSETS.ASSET_OBJ5;
+const ASSET_OBJ6: string = ASSETS.ASSET_OBJ6;
+const ASSET_OBJ7: string = ASSETS.ASSET_OBJ7;
 
 // container
 let container: PIXI.Container = new PIXI.Container();
@@ -140,6 +145,9 @@ let cardWidth: number = 92;
 let cardHeight: number = 135;
 let cardOffset: number = 10;
 
+let cardShine1: PIXI.AnimatedSprite;
+let cardShine2: PIXI.AnimatedSprite;
+
 if (ASSET_BG === "") {
   console.log("Don't use background image.");
 } else {
@@ -147,6 +155,11 @@ if (ASSET_BG === "") {
 }
 loader.add("obj_1_data", ASSET_OBJ1);
 loader.add("obj_2_data", ASSET_OBJ2);
+loader.add("obj_3_data", ASSET_OBJ3);
+loader.add("obj_4_data", ASSET_OBJ4);
+loader.add("obj_5_data", ASSET_OBJ5);
+loader.add("obj_6_data", ASSET_OBJ6);
+loader.add("obj_7_data", ASSET_OBJ7);
 
 loader.load((loader: PIXI.Loader, resources: any) => {
   console.log(loader);
@@ -277,6 +290,61 @@ const gameSetup = (resources: any): void => {
       }
     });
   }
+
+  // Create Animated sprite
+  let cardShineImages1: string[] = [
+    "assets/images/pic_light_1.png",
+    "assets/images/pic_light_1.png",
+    "assets/images/pic_light_2.png",
+    "assets/images/pic_light_3.png",
+    "assets/images/pic_light_4.png",
+  ];
+  let textureArray: PIXI.Texture[] = [];
+  //let textureId: any = resources.obj_3_data.textures;
+
+  for (let i: number = 0; i < 5; i++) {
+    let texture: PIXI.Texture = PIXI.Texture.from(cardShineImages1[i]);
+    // let texture: PIXI.Sprite= new PIXI.Sprite(textureId[`pic_light_${i}.png`]);
+    textureArray.push(texture);
+  }
+
+  cardShine1 = new PIXI.AnimatedSprite(textureArray);
+  cardShine1.x = -1000;
+  cardShine1.y = -1000;
+  // cardShine.anchor.set(0.5);
+  cardShine1.scale.set(0.5);
+  cardShine1.animationSpeed = 0.2;
+  cardShine1.loop = false;
+  // anim.tint = 0x000000;
+  // cardShine.visible = true;
+  cardShine1.play();
+  cardShine1.onComplete = () => {
+    console.log("anim.totalFrames: ", cardShine1.totalFrames);
+    console.log("animation end");
+    cardShine1.interactive = true;
+    cardShine1.visible = false;
+  };
+  cardShine1.interactive = true;
+  container.addChild(cardShine1);
+
+  cardShine2 = new PIXI.AnimatedSprite(textureArray);
+  cardShine2.x = -1000;
+  cardShine2.y = -1000;
+  // cardShine.anchor.set(0.5);
+  cardShine2.scale.set(0.5);
+  cardShine2.animationSpeed = 0.2;
+  cardShine2.loop = false;
+  // anim.tint = 0x000000;
+  // cardShine.visible = true;
+  cardShine2.play();
+  cardShine2.onComplete = () => {
+    console.log("anim.totalFrames: ", cardShine2.totalFrames);
+    console.log("animation end");
+    cardShine2.interactive = true;
+    cardShine2.visible = false;
+  };
+  cardShine2.interactive = true;
+  container.addChild(cardShine2);
 
   // カードクラスのインスタンス生成
   const cardgame: CardGame = new CardGame();
@@ -517,6 +585,20 @@ class CardGame {
           "this.openCardSprite[1].name: ",
           this.openCardSprite[1].name
         );
+
+        // カードを輝かせる
+        await this.sleep(300);
+        cardShine1.x = this.openCardSprite[0].x;
+        cardShine1.y = this.openCardSprite[0].y;
+        cardShine1.visible = true;
+        cardShine1.gotoAndStop(1);
+        cardShine1.play();
+
+        cardShine2.x = this.openCardSprite[1].x;
+        cardShine2.y = this.openCardSprite[1].y;
+        cardShine2.visible = true;
+        cardShine2.gotoAndStop(1);
+        cardShine2.play();
 
         // ちょっと待ってから右下に移動？エフェクトも欲しい
         await this.sleep(1500);
