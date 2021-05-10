@@ -1,6 +1,6 @@
 # Test to create a sample of memory game with pixijs.
 
-<img src="https://evofan.github.io/pixijs_test_memory_game/screenshot/pic_screenshot5.jpg" width="50%">  
+<img src="https://evofan.github.io/pixijs_test_memory_game/screenshot/pic_screenshot6.jpg" width="50%">  
 
 Demo  
 [https://evofan.github.io/pixijs_test_memory_game/dist/](https://evofan.github.io/pixijs_test_memory_game/dist/)  
