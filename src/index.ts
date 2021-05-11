@@ -121,6 +121,7 @@ let cardShine2: PIXI.AnimatedSprite;
 // text
 let text_pixiVersion: PIXI.Text;
 let message_gameclear: PIXI.Text;
+let text_loading: PIXI.Text;
 
 // flag
 let gameLoopFlag: boolean = false;
@@ -157,6 +158,19 @@ loader.onError.add(() => {
   throw Error("load error ...");
 });
 
+// Text1
+text_loading = setText(
+  "Loading asset data ....",
+  "Arial",
+  20,
+  0x333333,
+  "left",
+  "normal"
+);
+container.addChild(text_loading);
+text_loading.x = 10;
+text_loading.y = 10;
+
 /**
  * EnterFrame
  * @param delta
@@ -171,6 +185,8 @@ const gameLoop = (delta: number): void => {
  */
 const gameSetup = (): void => {
   console.log("gameSetup()");
+
+  container.removeChild(text_loading);
 
   // main class
   const cardgame: CardGame = new CardGame();
@@ -241,12 +257,29 @@ class CardGame {
     container.addChild(gameClearScene);
     gameClearScene.visible = false;
 
-    let style: PIXI.TextStyle = new PIXI.TextStyle({
-      fontFamily: "Futura",
-      fontSize: 64,
-      fill: "white",
-    });
-    message_gameclear = new PIXI.Text("Game Clear!", style);
+    // text pixi version
+    let version: string = `PixiJS: ver.${PIXI.VERSION}`;
+    text_pixiVersion = setText(
+      version,
+      "Arial",
+      16,
+      0xf0fff0,
+      "left",
+      "normal"
+    );
+    container.addChild(text_pixiVersion);
+    text_pixiVersion.x = WIDTH - text_pixiVersion.width - 10;
+    text_pixiVersion.y = HEIGHT - text_pixiVersion.height - 5;
+
+    // text game clear
+    message_gameclear = setText(
+      "Game Clear!",
+      "Arial",
+      64,
+      0xf0fff0,
+      "left",
+      "normal"
+    );
     message_gameclear.x = WIDTH / 2;
     message_gameclear.y = HEIGHT / 2;
     message_gameclear.anchor.set(0.5, 0.5);
