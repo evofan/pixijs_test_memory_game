@@ -120,7 +120,7 @@ let cardShine2: PIXI.AnimatedSprite;
 
 // text
 let text_pixiVersion: PIXI.Text;
-let message_gameclear: PIXI.Text;
+let text_gameclear: PIXI.Text;
 let text_loading: PIXI.Text;
 
 // flag
@@ -158,7 +158,7 @@ loader.onError.add(() => {
   throw Error("load error ...");
 });
 
-// Text1
+// text loading
 text_loading = setText(
   "Loading asset data ....",
   "Arial",
@@ -229,7 +229,7 @@ class CardGame {
 
   public leftNum: number = this.cardMaxNum; // Number of remaining cards, 0 = gameclear
 
-  public mouseEnabled: boolean = true; // ボタン連打防止用
+  public mouseEnabled: boolean = true;
 
   /**
    * Initialize the card order.
@@ -272,7 +272,7 @@ class CardGame {
     text_pixiVersion.y = HEIGHT - text_pixiVersion.height - 5;
 
     // text game clear
-    message_gameclear = setText(
+    text_gameclear = setText(
       "Game Clear!",
       "Arial",
       64,
@@ -280,13 +280,13 @@ class CardGame {
       "left",
       "normal"
     );
-    message_gameclear.x = WIDTH / 2;
-    message_gameclear.y = HEIGHT / 2;
-    message_gameclear.anchor.set(0.5, 0.5);
-    message_gameclear.scale.x = 0.5;
-    message_gameclear.scale.y = 0.5;
-    message_gameclear.alpha = 1; // TODO: tween
-    gameClearScene.addChild(message_gameclear);
+    text_gameclear.x = WIDTH / 2;
+    text_gameclear.y = HEIGHT / 2;
+    text_gameclear.anchor.set(0.5, 0.5);
+    text_gameclear.scale.x = 0.5;
+    text_gameclear.scale.y = 0.5;
+    text_gameclear.alpha = 1; // TODO: tween
+    gameClearScene.addChild(text_gameclear);
 
     // Set sprite sheet(texture atras frame)
     let id: any = gameResources.obj_1_data.textures;
@@ -640,7 +640,7 @@ class CardGame {
   }
 
   /**
-   * Wait a minutes
+   * Wait a minute
    * @param ms millisecond
    * @returns
    */
