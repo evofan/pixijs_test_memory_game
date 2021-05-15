@@ -204,13 +204,13 @@ class CardGame {
   public cardMaxNum: number = 12; // Maximum number of cards
   public cardPicMaxNum: number = 7; // Maximum number of card symbols
 
-  public offsetX: number = 100; // Start arranging cards x point
-  public offsetY: number = 110; // Start arranging cards y point
+  public ofsX: number = 100; // Start arranging cards x point
+  public ofsY: number = 110; // Start arranging cards y point
   public cardCols: number = 4; // Number of cards arranged side by side (row)
   public cardRows: number = 3; // Number of cards arranged vertically (column)
-  public cardWidth: number = 92;
-  public cardHeight: number = 135;
-  public cardOffset: number = 10;
+  public cardW: number = 92;
+  public cardH: number = 135;
+  public cardOfs: number = 10;
 
   public count: number = 0; // Number of opened cards
   public openCard: [number, number] = [100, 100]; // two card, that now opened
@@ -230,6 +230,10 @@ class CardGame {
   public leftNum: number = this.cardMaxNum; // Number of remaining cards, 0 = gameclear
 
   public mouseEnabled: boolean = true;
+
+  private outArea: number = -1000;
+  private ofsXCard: number = this.cardW / 2; // Temporarily set because it is out of alignment with the sprite anchor and graphic
+  private ofsYCard: number = this.cardH / 2;
 
   /**
    * Initialize the card order.
@@ -295,9 +299,10 @@ class CardGame {
     // Register the sprite of the card design(1/2)
     for (let i: number = 0; i < this.cardPicMaxNum; i++) {
       cards1st[i] = new PIXI.Sprite(id[`pic_trumpx2_${i}.png`]);
+      cards1st[i].anchor.set(0.5, 0.5);
       cards1st[i].scale.x = cards1st[i].scale.y = scaleNum;
-      cards1st[i].x = -1000;
-      cards1st[i].y = -1000;
+      cards1st[i].x = this.outArea;
+      cards1st[i].y = this.outArea;
       container.addChild(cards1st[i]);
       cards1st[i].name = `cards1st_${i}`;
     }
@@ -305,9 +310,10 @@ class CardGame {
     // Register the sprite of the card design(2/2).
     for (let j: number = 0; j < this.cardPicMaxNum; j++) {
       cards2nd[j] = new PIXI.Sprite(id[`pic_trumpx2_${j}.png`]);
+      cards2nd[j].anchor.set(0.5, 0.5);
       cards2nd[j].scale.x = cards2nd[j].scale.y = scaleNum;
-      cards2nd[j].x = -1000;
-      cards2nd[j].y = -1000;
+      cards2nd[j].x = this.outArea;
+      cards2nd[j].y = this.outArea;
       container.addChild(cards2nd[j]);
       cards2nd[j].name = `cards2nd_${j}`;
     }
@@ -315,9 +321,10 @@ class CardGame {
     // Create sprites for the background image of the cards.
     for (let i: number = 0; i < this.cardMaxNum; i++) {
       cards_back[i] = new PIXI.Sprite(id["pic_trumpx2_cover.png"]);
+      cards_back[i].anchor.set(0.5, 0.5);
       cards_back[i].scale.x = cards_back[i].scale.y = scaleNum;
-      cards_back[i].x = -1000;
-      cards_back[i].y = -1000;
+      cards_back[i].x = this.outArea;
+      cards_back[i].y = this.outArea;
       container.addChild(cards_back[i]);
       cards_back[i].name = `cards_back_${i}`;
     }
@@ -327,13 +334,13 @@ class CardGame {
       rectangles[i] = new PIXI.Graphics();
       rectangles[i].lineStyle(1, 0xff3300, 0); // width, color, alpha
       rectangles[i].beginFill(0x66ccff);
-      rectangles[i].drawRect(0, 0, this.cardWidth, this.cardHeight);
+      rectangles[i].drawRect(0, 0, this.cardW, this.cardH);
       rectangles[i].endFill();
+      rectangles[i].pivot.set(0.5, 0.5);
       rectangles[i].x =
-        this.offsetX + (i % this.cardCols) * (this.cardWidth + this.cardOffset);
+        this.ofsX + (i % this.cardCols) * (this.cardW + this.cardOfs);
       rectangles[i].y =
-        this.offsetY +
-        (i % this.cardRows) * (this.cardHeight + this.cardOffset);
+        this.ofsY + (i % this.cardRows) * (this.cardH + this.cardOfs);
       //rectangles[i].x = 30 + i * 50 + 10;
       container.addChild(rectangles[i]);
 
@@ -341,6 +348,8 @@ class CardGame {
       rectangles[i].buttonMode = true;
       rectangles[i].interactiveChildren = true;
       rectangles[i].name = `rectangle_${i}`;
+
+      // rectangles[i].isSprite = true;
 
       // rectangle.visible = false; // Hit judgment disappears when using visible=false.
       rectangles[i].alpha = 0.0; // If alpha=0, hit judgment is valid.
@@ -374,8 +383,9 @@ class CardGame {
     }
 
     cardShine1 = new PIXI.AnimatedSprite(textureArray);
-    cardShine1.x = -1000;
-    cardShine1.y = -1000;
+    cardShine1.x = this.outArea;
+    cardShine1.y = this.outArea;
+    cardShine1.anchor.set(0.5, 0.5);
     cardShine1.scale.set(0.5);
     cardShine1.animationSpeed = 0.2;
     cardShine1.loop = false;
@@ -389,8 +399,9 @@ class CardGame {
     container.addChild(cardShine1);
 
     cardShine2 = new PIXI.AnimatedSprite(textureArray);
-    cardShine2.x = -1000;
-    cardShine2.y = -1000;
+    cardShine2.x = this.outArea;
+    cardShine2.y = this.outArea;
+    cardShine2.anchor.set(0.5, 0.5);
     cardShine2.scale.set(0.5);
     cardShine2.animationSpeed = 0.2;
     cardShine2.loop = false;
@@ -471,30 +482,37 @@ class CardGame {
     for (let i: number = 0; i < this.cardMaxNum; i++) {
       // set a card on the back
       cards_back[i].x =
-        this.offsetX + (i % this.cardCols) * (this.cardWidth + this.cardOffset);
+        this.ofsX +
+        (i % this.cardCols) * (this.cardW + this.cardOfs) +
+        this.ofsXCard;
       cards_back[i].y =
-        this.offsetY +
-        (i % this.cardRows) * (this.cardHeight + this.cardOffset);
+        this.ofsY +
+        (i % this.cardRows) * (this.cardH + this.cardOfs) +
+        this.ofsYCard;
 
       // set a card on the open
       if (this.isSameCard1st[this.card[i]] === false) {
         this.isSameCard1st[this.card[i]] = true;
         console.log("Display the card image of the 1st card of the pair");
         cards1st[this.card[i]].x =
-          this.offsetX +
-          (i % this.cardCols) * (this.cardWidth + this.cardOffset);
+          this.ofsX +
+          (i % this.cardCols) * (this.cardW + this.cardOfs) +
+          this.ofsXCard;
         cards1st[this.card[i]].y =
-          this.offsetY +
-          (i % this.cardRows) * (this.cardHeight + this.cardOffset);
+          this.ofsY +
+          (i % this.cardRows) * (this.cardH + this.cardOfs) +
+          this.ofsYCard;
         this.cardAll.push(cards1st[this.card[i]]);
       } else {
         console.log("Display the card image of the 2nd card of the pair");
         cards2nd[this.card[i]].x =
-          this.offsetX +
-          (i % this.cardCols) * (this.cardWidth + this.cardOffset);
+          this.ofsX +
+          (i % this.cardCols) * (this.cardW + this.cardOfs) +
+          this.ofsXCard;
         cards2nd[this.card[i]].y =
-          this.offsetY +
-          (i % this.cardRows) * (this.cardHeight + this.cardOffset);
+          this.ofsY +
+          (i % this.cardRows) * (this.cardH + this.cardOfs) +
+          this.ofsYCard;
         this.cardAll.push(cards2nd[this.card[i]]);
       }
     }
@@ -592,11 +610,36 @@ class CardGame {
         cardShine2.play();
 
         // Wait a moment and then move to the bottom left
-        await this.sleep(1200);
-        this.openCardSprite[0].x = 100 + (this.cardMaxNum - this.leftNum) * 5;
-        this.openCardSprite[0].y = 550;
-        this.openCardSprite[1].x = 110 + (this.cardMaxNum - this.leftNum) * 5;
-        this.openCardSprite[1].y = 550;
+        await this.sleep(1000);
+        let x0: number = 100 + (this.cardMaxNum - this.leftNum) * 10;
+        let y0: number = 550 + this.ofsYCard;
+        let x1: number = 110 + (this.cardMaxNum - this.leftNum) * 10;
+        let y1: number = 550 + this.ofsYCard;
+        // let rota0: number = randomInt(1, 360);
+        // let rota1: number = randomInt(-0.3, 0.3);
+        gsap.to(this.openCardSprite[0], {
+          duration: 1.0,
+          alpha: 1.0,
+          ease: "power4.out",
+          // ease: "elastic.out(1, 0.75)",
+          // ease: "back.out(1.7)",
+          // pixi: { scaleX: 1, scaleY: 1 },
+          x: x0,
+          y: y0,
+          //rotation: rota0,
+          // onComplete:
+        });
+        gsap.to(this.openCardSprite[1], {
+          duration: 1.2,
+          alpha: 1.0,
+          ease: "power4.out",
+          //ease: "elastic.out(1, 0.75)",
+          // pixi: { scaleX: 1, scaleY: 1 },
+          x: x1,
+          y: y1,
+          // rotation: rota1,
+          // onComplete:
+        });
         container.addChild(this.openCardSprite[0]);
         container.addChild(this.openCardSprite[1]);
         this.leftNum -= 2;
@@ -608,7 +651,7 @@ class CardGame {
         }
       } else {
         console.log("Pictures do not match, so restore them");
-        await this.sleep(1200);
+        await this.sleep(1000);
         this.rect1st.visible = true;
         this.rect2nd.visible = true;
         cards_back[this.selectNum1st].visible = true;
