@@ -122,6 +122,7 @@ let cardShine2: PIXI.AnimatedSprite;
 let text_pixiVersion: PIXI.Text;
 let text_gameclear: PIXI.Text;
 let text_loading: PIXI.Text;
+let text_left: PIXI.Text;
 
 // flag
 let gameLoopFlag: boolean = false;
@@ -205,7 +206,7 @@ class CardGame {
   public cardPicMaxNum: number = 7; // Maximum number of card symbols
 
   public ofsX: number = 100; // Start arranging cards x point
-  public ofsY: number = 110; // Start arranging cards y point
+  public ofsY: number = 120; // Start arranging cards y point
   public cardCols: number = 4; // Number of cards arranged side by side (row)
   public cardRows: number = 3; // Number of cards arranged vertically (column)
   public cardW: number = 92;
@@ -234,6 +235,8 @@ class CardGame {
   private outArea: number = -1000;
   private ofsXCard: number = this.cardW / 2; // Temporarily set because it is out of alignment with the sprite anchor and graphic
   private ofsYCard: number = this.cardH / 2;
+
+  private score: number = this.cardMaxNum;
 
   /**
    * Initialize the card order.
@@ -291,6 +294,9 @@ class CardGame {
     text_gameclear.scale.y = 0.5;
     text_gameclear.alpha = 1; // TODO: tween
     gameClearScene.addChild(text_gameclear);
+
+    // text score
+    this.displayScore();
 
     // Set sprite sheet(texture atras frame)
     let id: any = gameResources.obj_1_data.textures;
@@ -614,7 +620,7 @@ class CardGame {
         let x0: number = 100 + (this.cardMaxNum - this.leftNum) * 10;
         let y0: number = 550 + this.ofsYCard;
         let x1: number = 110 + (this.cardMaxNum - this.leftNum) * 10;
-        let y1: number = 550 + this.ofsYCard;
+        let y1: number = 560 + this.ofsYCard;
         // let rota0: number = randomInt(1, 360);
         // let rota1: number = randomInt(-0.3, 0.3);
         gsap.to(this.openCardSprite[0], {
@@ -662,6 +668,8 @@ class CardGame {
       console.log("\n");
     }
 
+    this.displayScore();
+
     // reset
     this.count = this.count + 1;
     if (this.count === 2) {
@@ -690,5 +698,16 @@ class CardGame {
   private sleep(ms: number) {
     // console.log("clearGame()", ms);
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  private displayScore(): void {
+    if (text_left) {
+      container.removeChild(text_left);
+    }
+    let left: string = `Left: ${this.leftNum}`;
+    text_left = setText(left, "Arial", 16, 0xf0fff0, "left", "normal");
+    container.addChild(text_left);
+    text_left.x = WIDTH - text_left.width - 50;
+    text_left.y = 50;
   }
 }
