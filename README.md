@@ -1,6 +1,6 @@
 # Test to create a sample of memory game with pixijs.
 
-<img src="https://evofan.github.io/pixijs_test_memory_game/screenshot/pic_screenshot6.jpg" width="50%">  
+<img src="https://evofan.github.io/pixijs_test_memory_game/screenshot/pic_screenshot7.jpg" width="50%">  
 
 Demo  
 [https://evofan.github.io/pixijs_test_memory_game/dist/](https://evofan.github.io/pixijs_test_memory_game/dist/)  
@@ -22,7 +22,6 @@ reference
 **Free Neon Sign Text Effect - Creativetacos**  
 [https://creativetacos.com/free-neon-sign-text-effect/](https://creativetacos.com/free-neon-sign-text-effect/)  
 
-
 **KanaWave**  
-(Sounds are produced with just letters!(Japanese only) Creating the world's easiest sound effects)  
+Sounds are produced with just letters!(Japanese only) Creating the world's easiest sound effects.  
 [https://www.vector.co.jp/soft/win95/art/se232653.html](https://www.vector.co.jp/soft/win95/art/se232653.html)  
