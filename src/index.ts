@@ -133,6 +133,20 @@ let gameResources: any;
 // sound
 let cardOpenSound: Howl;
 
+// text loading
+text_loading = setText(
+  "Loading asset data ....",
+  "Arial",
+  20,
+  0x333333,
+  "left",
+  "normal"
+);
+text_loading.x = 10;
+text_loading.y = 10;
+container.addChild(text_loading);
+requestAnimationFrame(animate); // Required for loading display
+
 if (ASSETS.ASSET_BG === "") {
   console.log("Don't use background image.");
 } else {
@@ -159,25 +173,12 @@ loader.onError.add(() => {
   throw Error("load error ...");
 });
 
-// text loading
-text_loading = setText(
-  "Loading asset data ....",
-  "Arial",
-  20,
-  0x333333,
-  "left",
-  "normal"
-);
-container.addChild(text_loading);
-text_loading.x = 10;
-text_loading.y = 10;
-
 /**
  * EnterFrame
  * @param delta
  */
 const gameLoop = (delta: number): void => {
-  // console.log("gameLoop()", delta);
+  console.log("gameLoop()", delta);
 };
 
 /**
@@ -194,8 +195,8 @@ const gameSetup = (): void => {
   cardgame.init();
 
   // app start
-  gameLoopFlag = true;
-  requestAnimationFrame(animate); // -> gameLoop start
+  // gameLoopFlag = true; // Not used this time
+  // requestAnimationFrame(animate); // -> gameLoop start
 };
 
 /**
@@ -207,11 +208,11 @@ class CardGame {
 
   public ofsX: number = 100; // Start arranging cards x point
   public ofsY: number = 120; // Start arranging cards y point
-  public cardCols: number = 4; // Number of cards arranged side by side (row)
-  public cardRows: number = 3; // Number of cards arranged vertically (column)
-  public cardW: number = 92;
-  public cardH: number = 135;
-  public cardOfs: number = 10;
+  public cardCols: number = 4; // Number of cards arranged side by side (cols)
+  public cardRows: number = 3; // Number of cards arranged vertically (rows)
+  public cardW: number = 92; // Card width
+  public cardH: number = 135; // Card height
+  public cardOfs: number = 10; // Interval for arranging cards
 
   public count: number = 0; // Number of opened cards
   public openCard: [number, number] = [100, 100]; // two card, that now opened
@@ -230,13 +231,11 @@ class CardGame {
 
   public leftNum: number = this.cardMaxNum; // Number of remaining cards, 0 = gameclear
 
-  public mouseEnabled: boolean = true;
+  public mouseEnabled: boolean = true; // Whether or not you can press the button
 
-  private outArea: number = -1000;
+  private outArea: number = -1000; // Place to put outside the area
   private ofsXCard: number = this.cardW / 2; // Temporarily set because it is out of alignment with the sprite anchor and graphic
-  private ofsYCard: number = this.cardH / 2;
-
-  private score: number = this.cardMaxNum;
+  private ofsYCard: number = this.cardH / 2; // Same as above,　pivot and anchor difference?
 
   /**
    * Initialize the card order.
@@ -258,9 +257,9 @@ class CardGame {
     pic_gametitle.scale.y = 0.75;
     pic_gametitle.x = WIDTH / 2 - pic_gametitle.width / 2;
     pic_gametitle.y = 20;
-
     container.addChild(pic_gametitle);
 
+    // scene game clear
     container.addChild(gameClearScene);
     gameClearScene.visible = false;
 
@@ -347,15 +346,13 @@ class CardGame {
         this.ofsX + (i % this.cardCols) * (this.cardW + this.cardOfs);
       rectangles[i].y =
         this.ofsY + (i % this.cardRows) * (this.cardH + this.cardOfs);
-      //rectangles[i].x = 30 + i * 50 + 10;
+      // rectangles[i].x = 30 + i * 50 + 10;
       container.addChild(rectangles[i]);
 
       rectangles[i].interactive = true;
       rectangles[i].buttonMode = true;
       rectangles[i].interactiveChildren = true;
       rectangles[i].name = `rectangle_${i}`;
-
-      // rectangles[i].isSprite = true;
 
       // rectangle.visible = false; // Hit judgment disappears when using visible=false.
       rectangles[i].alpha = 0.0; // If alpha=0, hit judgment is valid.
@@ -451,6 +448,7 @@ class CardGame {
       this.stat[idx] = 0;
     });
 
+    // Decide a pair of unused cards
     let notUseCard: number = randomInt(0, this.cardPicMaxNum - 1);
     console.log(`notUseCard: ${notUseCard}`);
 
@@ -632,14 +630,14 @@ class CardGame {
           // pixi: { scaleX: 1, scaleY: 1 },
           x: x0,
           y: y0,
-          //rotation: rota0,
+          // rotation: rota0,
           // onComplete:
         });
         gsap.to(this.openCardSprite[1], {
           duration: 1.2,
           alpha: 1.0,
           ease: "power4.out",
-          //ease: "elastic.out(1, 0.75)",
+          // ease: "elastic.out(1, 0.75)",
           // pixi: { scaleX: 1, scaleY: 1 },
           x: x1,
           y: y1,
@@ -693,13 +691,16 @@ class CardGame {
   /**
    * Wait a minute
    * @param ms millisecond
-   * @returns
+   * @returns promise object
    */
   private sleep(ms: number) {
     // console.log("clearGame()", ms);
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
+  /**
+   * Show score
+   */
   private displayScore(): void {
     if (text_left) {
       container.removeChild(text_left);
