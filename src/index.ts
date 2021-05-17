@@ -91,7 +91,7 @@ container.interactiveChildren = true;
 container.buttonMode = false;
 stage.addChild(container);
 
-let gameClearScene: PIXI.Container = new PIXI.Container();
+let gameClearScene: PIXI.Container = new PIXI.Container(); // game clear
 
 // Graphic
 let buttonOffRect: PIXI.Graphics = new PIXI.Graphics(); // button off cover
@@ -117,6 +117,8 @@ let cards2nd: PIXI.Sprite[] = [];
 // animation sprite
 let cardShine1: PIXI.AnimatedSprite;
 let cardShine2: PIXI.AnimatedSprite;
+let cardOpen1: PIXI.AnimatedSprite;
+let cardOpen2: PIXI.AnimatedSprite;
 
 // text
 let text_pixiVersion: PIXI.Text;
@@ -159,6 +161,11 @@ loader.add("obj_4_data", ASSETS.ASSET_OBJ4);
 loader.add("obj_5_data", ASSETS.ASSET_OBJ5);
 loader.add("obj_6_data", ASSETS.ASSET_OBJ6);
 loader.add("obj_7_data", ASSETS.ASSET_OBJ7);
+
+loader.add("obj_8_data", ASSETS.ASSET_OBJ8);
+loader.add("obj_9_data", ASSETS.ASSET_OBJ9);
+loader.add("obj_10_data", ASSETS.ASSET_OBJ10);
+loader.add("obj_11_data", ASSETS.ASSET_OBJ11);
 
 loader.load((loader: PIXI.Loader, resources: any) => {
   console.log(loader);
@@ -372,20 +379,22 @@ class CardGame {
     }
 
     // Create Animated sprite
-    let cardShineImages: string[] = [
+
+    // card Shine anime
+    let cardShineImg: string[] = [
       "assets/images/pic_light_1.png",
       "assets/images/pic_light_1.png",
       "assets/images/pic_light_2.png",
       "assets/images/pic_light_3.png",
       "assets/images/pic_light_4.png",
     ];
-    let textureArray: PIXI.Texture[] = [];
+    let textureArrayCsh: PIXI.Texture[] = [];
     for (let i: number = 0; i < 5; i++) {
-      let texture: PIXI.Texture = PIXI.Texture.from(cardShineImages[i]);
-      textureArray.push(texture);
+      let texture: PIXI.Texture = PIXI.Texture.from(cardShineImg[i]);
+      textureArrayCsh.push(texture);
     }
 
-    cardShine1 = new PIXI.AnimatedSprite(textureArray);
+    cardShine1 = new PIXI.AnimatedSprite(textureArrayCsh);
     cardShine1.x = this.outArea;
     cardShine1.y = this.outArea;
     cardShine1.anchor.set(0.5, 0.5);
@@ -401,7 +410,7 @@ class CardGame {
     };
     container.addChild(cardShine1);
 
-    cardShine2 = new PIXI.AnimatedSprite(textureArray);
+    cardShine2 = new PIXI.AnimatedSprite(textureArrayCsh);
     cardShine2.x = this.outArea;
     cardShine2.y = this.outArea;
     cardShine2.anchor.set(0.5, 0.5);
@@ -416,6 +425,48 @@ class CardGame {
       cardShine2.visible = false;
     };
     container.addChild(cardShine2);
+
+    // Card open anime
+    let cardOpenImg: string[] = [
+      "assets/images/pic_card_open_1.png",
+      "assets/images/pic_card_open_2.png",
+      "assets/images/pic_card_open_3.png",
+      "assets/images/pic_card_open_4.png",
+    ];
+    let textureArrayCop: PIXI.Texture[] = [];
+    for (let i: number = 0; i < 4; i++) {
+      let texture: PIXI.Texture = PIXI.Texture.from(cardOpenImg[i]);
+      textureArrayCop.push(texture);
+    }
+
+    // Card Open
+    cardOpen1 = new PIXI.AnimatedSprite(textureArrayCop);
+    cardOpen1.x = this.outArea;
+    cardOpen1.y = this.outArea;
+    cardOpen1.anchor.set(0.5, 0.5);
+    cardOpen1.scale.set(0.5);
+    cardOpen1.animationSpeed = 0.5;
+    cardOpen1.loop = false;
+    cardOpen1.alpha = 1;
+    cardOpen1.play();
+    cardOpen1.onComplete = () => {
+      cardOpen1.visible = false;
+    };
+    container.addChild(cardOpen1);
+
+    cardOpen2 = new PIXI.AnimatedSprite(textureArrayCop);
+    cardOpen2.x = this.outArea;
+    cardOpen2.y = this.outArea;
+    cardOpen2.anchor.set(0.5, 0.5);
+    cardOpen2.scale.set(0.5);
+    cardOpen2.animationSpeed = 0.5;
+    cardOpen2.loop = false;
+    cardOpen2.alpha = 1;
+    cardOpen2.play();
+    cardOpen2.onComplete = () => {
+      cardOpen2.visible = false;
+    };
+    container.addChild(cardOpen2);
 
     // SE
     cardOpenSound = new Howl({
@@ -560,9 +611,24 @@ class CardGame {
 
       if (this.stat[selectNum] === CARD_CLOSED) {
         this.stat[selectNum] = CARD_OPEN;
+
+        this.cardAll[selectNum].visible = false;
         cards_back[selectNum].visible = false;
+
         this.openCard[0] = this.card[selectNum];
         this.openCardSprite[0] = this.cardAll[selectNum];
+
+        // open anime
+        cardOpen1.x = cards_back[selectNum].x;
+        cardOpen1.y = cards_back[selectNum].y;
+        cardOpen1.visible = true;
+        cardOpen1.gotoAndStop(0);
+        cardOpen1.play();
+        cardOpen1.onComplete = () => {
+          cardOpen1.visible = false;
+          this.openCardSprite[0].visible = true;
+        };
+
         console.log("this.openCard[0]: ", this.openCard[0]);
         console.log("this.openCard[this.count]; ", this.openCard[this.count]);
         console.log("this.openCardSprite[0]: ", this.openCardSprite[0].name);
@@ -580,10 +646,24 @@ class CardGame {
       this.rect2nd.visible = false;
 
       this.stat[selectNum] = CARD_OPEN;
+
+      this.cardAll[selectNum].visible = false;
       cards_back[selectNum].visible = false;
 
       this.openCard[1] = this.card[selectNum];
       this.openCardSprite[1] = this.cardAll[selectNum];
+
+      // open anime
+      cardOpen2.x = cards_back[selectNum].x;
+      cardOpen2.y = cards_back[selectNum].y;
+      cardOpen2.visible = true;
+      cardOpen2.gotoAndStop(0);
+      cardOpen2.play();
+      cardOpen2.onComplete = () => {
+        cardOpen2.visible = false;
+        this.openCardSprite[1].visible = true;
+      };
+
       console.log("this.openCard[1]: ", this.openCard[1]);
       console.log("this.openCard[this.count]", this.openCard[this.count]);
       console.log("this.openCardSprite[1]: ", this.openCardSprite[1].name);
@@ -646,6 +726,7 @@ class CardGame {
         });
         container.addChild(this.openCardSprite[0]);
         container.addChild(this.openCardSprite[1]);
+
         this.leftNum -= 2;
         console.log(`this.leftNum: ${this.leftNum}`);
 
