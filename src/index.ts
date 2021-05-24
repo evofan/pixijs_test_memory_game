@@ -73,6 +73,12 @@ let animate: FrameRequestCallback = (): void => {
   stats.end();
 };
 
+let animateLoading: FrameRequestCallback = (): void => {
+  console.log("animateLoading()");
+  renderer.render(stage);
+  // requestAnimationFrame(animateLoading);
+};
+
 // init
 
 // loader
@@ -147,7 +153,7 @@ text_loading = setText(
 text_loading.x = 10;
 text_loading.y = 10;
 container.addChild(text_loading);
-requestAnimationFrame(animate); // Required for loading display
+requestAnimationFrame(animateLoading); // Required for loading display
 
 if (ASSETS.ASSET_BG === "") {
   console.log("Don't use background image.");
@@ -170,6 +176,11 @@ loader.add("obj_11_data", ASSETS.ASSET_OBJ11);
 loader.load((loader: PIXI.Loader, resources: any) => {
   console.log(loader);
   console.log(resources);
+
+  container.removeChild(text_loading);
+  let temp: number = requestAnimationFrame(animateLoading);
+  cancelAnimationFrame(temp);
+
   gameResources = resources;
 
   gameSetup();
@@ -203,7 +214,7 @@ const gameSetup = (): void => {
 
   // app start
   // gameLoopFlag = true; // Not used this time
-  // requestAnimationFrame(animate); // -> gameLoop start
+  requestAnimationFrame(animate); // -> gameLoop start
 };
 
 /**
