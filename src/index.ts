@@ -274,7 +274,7 @@ class CardGame {
     pic_gametitle.scale.x = 0.75;
     pic_gametitle.scale.y = 0.75;
     pic_gametitle.x = WIDTH / 2 - pic_gametitle.width / 2;
-    pic_gametitle.y = 20;
+    pic_gametitle.y = 35;
     container.addChild(pic_gametitle);
 
     // scene game clear
@@ -800,7 +800,7 @@ class CardGame {
     let left: string = `Left: ${this.leftNum}`;
     text_left = setText(left, "Arial", 16, 0xf0fff0, "left", "normal");
     container.addChild(text_left);
-    text_left.x = WIDTH - text_left.width - 50;
-    text_left.y = 50;
+    text_left.x = 445;
+    text_left.y = 555;
   }
 }
