@@ -2,8 +2,14 @@
 
 <img src="https://evofan.github.io/pixijs_test_memory_game/screenshot/pic_screenshot7.jpg" width="50%">  
 
-Demo  
+**Demo**  
 [https://evofan.github.io/pixijs_test_memory_game/dist/](https://evofan.github.io/pixijs_test_memory_game/dist/)  
+
+**Usage**  
+`npm install`  
+`npm run build`  
+`npm run start`  
+http://localhost:8080/  
 
 reference
 
